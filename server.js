@@ -32,23 +32,14 @@ http.createServer(function(req, res) {
     	body += chunk;
     });
     req.on('end', function() {
-        var request_url = req.url;
-        if(!request_url) {
-        	return res.end('must have url!');
-        } else {
-			log.i("> " + request_url);
-        }
+        var request_url = "http://" + req.headers.host + req.url;
+		log.i("> " + request_url);
+
 		log.d("headers:");
 		log.d(req.headers);
 
         var option = url.parse(request_url);
-
-		log.d("url parse result:");
-		log.d(option);
-
-        req.headers.host = option.host;
-        option.path = option.path ? option.path : option.pathname + (option.search ? option.search : '');
-        req.headers.path = option.path;
+        option.path = option.path ? option.path : option.pathname + (option.search || '');
         option.method = req.method;
         option.headers = req.headers;
 
