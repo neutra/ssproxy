@@ -27,12 +27,14 @@ var log = {
 };
 
 http.createServer(function(req, res) {
+	log.i("GET request: " + req.url)
     var body = '';
     req.on('data', function(chunk) {
     	body += chunk;
     });
     req.on('end', function() {
-        var targeturl = req.headers.targeturl;
+        var targeturl = req.headers['x-target-url'];
+
         if(!targeturl) return res.send("must have targeturl");
 		log.i("> " + targeturl);
 
@@ -41,7 +43,9 @@ http.createServer(function(req, res) {
 
         var option = url.parse(targeturl);
         option.method = req.method;
-        delete req.headers.targeturl;
+        delete req.headers.host;
+        delete req.headers.hostname;
+        delete req.headers['x-target-url'];
         option.headers = req.headers;
 
 		log.d("proxy options:");

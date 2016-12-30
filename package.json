@@ -4,6 +4,7 @@
   "description": "shadowsocks proxy",
   "main": "server.js",
   "dependencies": {
+    "http-proxy": "^1.16.2"
   },
   "engine": {
     "node": "*",
