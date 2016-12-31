@@ -35,7 +35,7 @@ http.createServer(function(req, res) {
     req.on('end', function() {
         var targeturl = req.headers['x-target-url'];
 
-        if(!targeturl) return res.send("must have targeturl");
+        if(!targeturl) return res.end("must have targeturl");
 		log.i("> " + targeturl);
 
 		log.d("headers:");
@@ -43,9 +43,14 @@ http.createServer(function(req, res) {
 
         var option = url.parse(targeturl);
         option.method = req.method;
-        delete req.headers.host;
-        delete req.headers.hostname;
+        delete req.headers['host'];
+        delete req.headers['hostname'];
         delete req.headers['x-target-url'];
+        delete req.headers['x-forwarded-host'];
+     	delete req.headers['x-forwarded-port'];
+     	delete req.headers['x-forwarded-proto'];
+     	delete req.headers['forwarded'];
+     	delete req.headers['x-forwarded-for'];
         option.headers = req.headers;
 
 		log.d("proxy options:");
@@ -56,16 +61,16 @@ http.createServer(function(req, res) {
             for(var key in result.headers) {
                 res.setHeader(key, result.headers[key]);
             }
-            result.on('data', function(chunk) {
-                res.write(chunk);
-            });
-            result.on('end', function() {
+        	res.writeHead(result.statusCode);
+        	result.on('error', function(e){
                 res.end();
-            });
+        	});
+        	result.pipe(res);
         }).on('error', function(error) {
-            res.end('remote http.request error ' + error)}).end(body);
+            res.end('remote http.request error ' + error);
+        }).end(body);
 
-    	});
-	}).listen(port);
+    });
+}).listen(port);
 
 log.i("listen: " + port);
